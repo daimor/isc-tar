@@ -12,7 +12,7 @@ build: ## Build the container
 	docker build -t $(IMAGE) .
 
 test: build ## Run UnitTests
-	$(eval TEMPDIR := $(shell mktemp -d /tmp/$(APP_NAME).XXXXXX))
+	$(eval TEMPDIR := $(shell mktemp -d `pwd`/XXXXXX))
 	echo \
 		"set ^UnitTestRoot=\"/opt/tests/cls\"\n" \
 		"do ##class(%UnitTest.Manager).RunTestSuites()\n" \
@@ -23,7 +23,6 @@ test: build ## Run UnitTests
 		"iris stop \$$ISC_PACKAGE_INSTANCENAME quietly\n" > $(TEMPDIR)/tests.sh
 	chmod a+x $(TEMPDIR)/tests.sh
 	docker run --rm -i \
-		-v $(HOME)/iris.key:/usr/irissys/mgr/iris.key \
 		-v $(shell pwd)/tests:/opt/tests \
 		-v $(TEMPDIR)/tests.sh:/opt/extra/tests.sh \
 		-v $(TEMPDIR)/tests.scr:/opt/extra/tests.scr \

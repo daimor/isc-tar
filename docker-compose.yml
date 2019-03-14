@@ -8,5 +8,4 @@ services:
       - IRIS_USER=test
       - IRIS_PASSWORD=test
     volumes:
-      - ~/iris.key:/usr/irissys/mgr/iris.key
       - ./tests:/opt/tests
