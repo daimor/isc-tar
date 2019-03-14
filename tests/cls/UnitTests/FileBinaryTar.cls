@@ -20,6 +20,20 @@ Method CheckExtracted(extracted As %zUtils.FileBinaryTar) [ Internal ]
   do $$$AssertEquals(file.fileData.Read(), "test file in subfolder", "right content")
   do $$$AssertStatusOK(folder.FindPath("test.txt", .file), "test.txt in the folder")
   do $$$AssertEquals(file.fileData.Read(), "test file in folder", "right content")
+  set tmpDir = $$$FileTempDir
+  do $$$AssertStatusOK(extracted.ExtractTo(tmpDir))
+  do $$$AssertTrue(##class(%File).DirectoryExists(##class(%File).NormalizeDirectory("folder", tmpDir)))
+  do $$$AssertTrue(##class(%File).DirectoryExists(##class(%File).NormalizeDirectory("folder/subfolder", tmpDir)))
+  
+  set file = ##class(%File).NormalizeFilename("folder/test.txt", tmpDir)
+  do $$$AssertTrue(##class(%File).Exists(file))
+  do $$$AssertEquals(##class(%File).GetFileSize(file), 19)
+  
+  set file = ##class(%File).NormalizeFilename("folder/subfolder/test.txt", tmpDir)
+  do $$$AssertTrue(##class(%File).Exists(file))
+  do $$$AssertEquals(##class(%File).GetFileSize(file), 22)
+
+  do ##class(%File).RemoveDirectoryTree(tmpDir)
 }
 
 /// Testing Compact some data to archive

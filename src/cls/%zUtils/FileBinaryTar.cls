@@ -142,6 +142,31 @@ ClassMethod ExtractFile(aFileName As %String = "", Gzip As %Boolean = 1) As File
 	Return ..ExtractStream(fileStream)
 }
 
+Method ExtractTo(pDest As %String) As %Status
+{
+  if ..name'="" {
+    if ..typeflag=5 {
+      set fullPath = ##class(%File).NormalizeDirectory(..name, pDest)
+      set sc = ##class(%File).CreateDirectoryChain(fullPath)
+      if $$$ISERR(sc) {
+        return sc
+      }
+    } else {
+      set fullPath = ##class(%File).NormalizeFilename(..name, pDest)
+      set fs = ##class(%Stream.FileBinary).%New()
+      set fs.Filename = fullPath
+      do fs.CopyFromAndSave(..fileData)
+      do fs.%Close()
+    }
+  }
+
+  set key = ""
+  while ..GetNext(.key) {
+    do ..GetAt(key).ExtractTo(pDest)
+  }
+  quit $$$OK
+}
+
 ClassMethod ExtractStream(aFileStream As %Stream.Object) As FileBinaryTar
 {
   #dim tFile As FileBinaryTar
