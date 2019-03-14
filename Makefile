@@ -12,20 +12,5 @@ build: ## Build the container
 	docker build -t $(IMAGE) .
 
 test: build ## Run UnitTests
-	$(eval TEMPDIR := $(shell mktemp -d `pwd`/XXXXXX))
-	echo \
-		"set ^UnitTestRoot=\"/opt/tests/cls\"\n" \
-		"do ##class(%UnitTest.Manager).RunTestSuites()\n" \
-		"halt" > $(TEMPDIR)/tests.scr
-	echo "#!/bin/bash\n\ncat /opt/extra/tests.scr\n" \
-		"iris start \$$ISC_PACKAGE_INSTANCENAME quietly\n" \
-		"iris session \$$ISC_PACKAGE_INSTANCENAME -U%SYS < /opt/extra/tests.scr\n" \
-		"iris stop \$$ISC_PACKAGE_INSTANCENAME quietly\n" > $(TEMPDIR)/tests.sh
-	chmod a+x $(TEMPDIR)/tests.sh
-	docker run --rm -i \
-		-v $(shell pwd)/tests:/opt/tests \
-		-v $(TEMPDIR)/tests.sh:/opt/extra/tests.sh \
-		-v $(TEMPDIR)/tests.scr:/opt/extra/tests.scr \
-		--entrypoint /opt/extra/tests.sh \
-		$(IMAGE)
-	rm -rf $(TEMPDIR)
+	docker build -t $(IMAGE)-test -f Dockerfile.test .
+	docker run --rm -i $(IMAGE)-test

@@ -1,0 +1,6 @@
+FROM intersystems/tar
+
+COPY tests /opt/tests
+COPY .ci /opt/
+
+ENTRYPOINT [ "/opt/tests_entrypoint.sh" ]
