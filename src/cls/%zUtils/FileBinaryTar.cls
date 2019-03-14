@@ -1,17 +1,19 @@
 Class %zUtils.FileBinaryTar Extends (%RegisteredObject, %ArrayOfDataTypes)
 {
 
+Parameter BLOCKSIZE As %Integer = 512;
+
 /// name of file
-Property name As %String(CAPTION = "Header", MAXLEN = 100, TRUNCATE = 0);
+Property name As %String(CAPTION = "Header", MAXLEN = 100, TRUNCATE = 1);
 
 /// file mode
 Property mode As %String(CAPTION = "Header", MAXLEN = 8);
 
 /// owner user ID
-Property uid As %String(CAPTION = "Header", MAXLEN = 8);
+Property uid As %String(CAPTION = "Header", MAXLEN = 8) [ InitialExpression = {..Dec2Oct(0, 6)} ];
 
 /// owner group ID
-Property gid As %String(CAPTION = "Header", MAXLEN = 8);
+Property gid As %String(CAPTION = "Header", MAXLEN = 8) [ InitialExpression = {..Dec2Oct(0, 6)} ];
 
 /// length of file in bytes
 Property size As %String(CAPTION = "Header", MAXLEN = 12);
@@ -20,34 +22,34 @@ Property size As %String(CAPTION = "Header", MAXLEN = 12);
 Property mtime As %String(CAPTION = "Header", MAXLEN = 12);
 
 /// checksum for header
-Property chksum As %String(CAPTION = "Header", MAXLEN = 8);
+Property chksum As %String(CAPTION = "Header", MAXLEN = 8) [ InitialExpression = {$JUSTIFY("", 8)} ];
 
 /// type of file
 Property typeflag As %String(CAPTION = "Header", DISPLAYLIST = ",REGULAR,LINK,RESERVED,CHARACTER SPECIAL,BLOCK SPECIAL,DIRECTORY,FIFO SPECIAL,RESERVED", MAXLEN = 1, VALUELIST = ",0,1,2,3,4,5,6,7,x,g,L,K");
 
 /// name of linked file
-Property linkname As %String(CAPTION = "Header", MAXLEN = 100);
+Property linkname As %String(CAPTION = "Header", MAXLEN = 100, TRUNCATE = 1);
 
 /// USTAR indicator
-Property magic As %String(CAPTION = "Header", MAXLEN = 6);
+Property magic As %String(CAPTION = "Header", MAXLEN = 6, TRUNCATE = 1) [ InitialExpression = "ustar" ];
 
 /// USTAR version
-Property version As %String(CAPTION = "Header", MAXLEN = 2);
+Property version As %String(CAPTION = "Header", MAXLEN = 2) [ InitialExpression = "00" ];
 
 /// owner user name
-Property uname As %String(CAPTION = "Header", MAXLEN = 32);
+Property uname As %String(CAPTION = "Header", MAXLEN = 32, TRUNCATE = 1);
 
 /// owner group name
-Property gname As %String(CAPTION = "Header", MAXLEN = 32);
+Property gname As %String(CAPTION = "Header", MAXLEN = 32, TRUNCATE = 1);
 
 /// device major number
-Property devmajor As %String(CAPTION = "Header", MAXLEN = 8);
+Property devmajor As %String(CAPTION = "Header", MAXLEN = 8) [ InitialExpression = {..Dec2Oct(0, 6)} ];
 
 /// device minor number
-Property devminor As %String(CAPTION = "Header", MAXLEN = 8);
+Property devminor As %String(CAPTION = "Header", MAXLEN = 8) [ InitialExpression = {..Dec2Oct(0, 6)} ];
 
 /// prefix for file name
-Property prefix As %String(CAPTION = "Header", MAXLEN = 155);
+Property prefix As %String(CAPTION = "Header", MAXLEN = 155, TRUNCATE = 1);
 
 /// file data
 Property fileData As %Stream.Object;
@@ -64,9 +66,51 @@ Method sizeGet() As %Integer
 
 Method sizeSet(pSize As %Integer) As %Status
 {
-	set i%size=$translate($justify($$dec2oct^%Wmdc(pSize),11)," ",0)
-	quit:$length(i%size)>11 $$$ERROR(5001, "Size too big")
-	quit $$$OK
+	set i%size = ..Dec2Oct(pSize, 11)
+	if ($length(i%size)>11) {
+		return $$$ERROR(5001, "Size too big")
+	}
+	return $$$OK
+}
+
+Method modeSet(pMode As %Integer) As %Status
+{
+	if $$$isWINDOWS {
+		set mode = 0
+		set mask = 0
+	} else {
+		set mode = pMode
+		set mask = 4095
+	}
+	set i%mode = ..Dec2Oct(mode, 6, mask)
+	return $$$OK
+}
+
+Method mtimeSet(pTime As %Integer) As %Status
+{
+	set mtime =..Dec2Oct(pTime, 11)
+	set i%mtime = mtime
+	return $$$OK
+}
+
+Method chksumSet(pVal As %Integer) As %Status
+{
+	set tVal =..Dec2Oct(pVal, 6)
+	set i%chksum = tVal
+	return $$$OK
+}
+
+ClassMethod Dec2Oct(pVal As %Integer, pLen As %Integer, pMask As %Integer = 0) As %String
+{
+	set val = pVal
+	if (pMask>0) {
+		set val = $ZBOOLEAN(val, pMask, 1)
+	}
+	set val = $$dec2oct^%Wmdc(val)
+	set val = $JUSTIFY(val, pLen)
+	set val = $TRANSLATE(val, " ", 0)
+	set val = val _ $c(32)
+	return val
 }
 
 Method FindPath(pPath As %String = "", Output found As FileBinaryTar) As %Status
@@ -81,24 +125,27 @@ Method FindPath(pPath As %String = "", Output found As FileBinaryTar) As %Status
 		return tmp.FindPath($p(pPath, "/", 2, *), .found)
 	}
 	set found = tmp
-	quit $$$OK
+	Return $$$OK
 }
 
 ClassMethod ExtractFile(aFileName As %String = "", Gzip As %Boolean = 1) As FileBinaryTar
 {
-	if aFileName = "" quit $$$ERROR($$$GeneralError, "Filename not specified")
+	if aFileName = "" {
+    Return $$$ERROR($$$GeneralError, "Filename not specified")
+  }
 	if Gzip {
 		set fileStream=##class(%Stream.FileBinaryGzip).%New()
 	} else {
 		set fileStream=##class(%Stream.FileBinary).%New()
 	}
 	set fileStream.Filename=aFileName
-	quit ..ExtractStream(fileStream)
+	Return ..ExtractStream(fileStream)
 }
 
 ClassMethod ExtractStream(aFileStream As %Stream.Object) As FileBinaryTar
 {
-	#dim blockSize As %Integer = 512
+  #dim tFile As FileBinaryTar
+	set blockSize = ..#BLOCKSIZE
 	set result=..%New()
 	while 'aFileStream.AtEnd {
 		set tFile=..%New()
@@ -107,6 +154,8 @@ ClassMethod ExtractStream(aFileStream As %Stream.Object) As FileBinaryTar
 		do {
 			set tHeader=aFileStream.Read(blockSize)
 			do tFile.ParseHeader(tHeader)
+			set $EXTRACT(tHeader, 149, 156) = $JUSTIFY("", 8)
+			set chksumExpected = $zcrc(tHeader, 0)
 			set magic=tFile.magic
 			quit:tFile.name=""
 			set fileSize=tFile.size
@@ -135,12 +184,12 @@ ClassMethod ExtractStream(aFileStream As %Stream.Object) As FileBinaryTar
 		set:fileSize#blockSize>0 readBlocks=readBlocks + 1
 		set tFile.fileData=##class(%Stream.FileBinary).%New()
 		for tPos=1:1:readBlocks {
-			set tData=aFileStream.Read(512)
+			set tData=aFileStream.Read(blockSize)
 			set:tPos=readBlocks tData=$extract(tData, 1, fileSize#blockSize)
 			do tFile.fileData.Write(tData)
 		}
 	}
-	quit result
+	Return result
 }
 
 ClassMethod AddToArray(pFile As FileBinaryTar, pArray As FileBinaryTar) [ Internal, Private ]
@@ -160,7 +209,7 @@ ClassMethod AddToArray(pFile As FileBinaryTar, pArray As FileBinaryTar) [ Intern
 	do tItem.SetAt(pFile, $piece(tFileName, "/", $length(tFileName, "/")))
 }
 
-Method ParseHeader(aHeaderData As %String) [ CodeMode = objectgenerator ]
+Method ParseHeader(aHeaderData As %String) [ CodeMode = objectgenerator, Internal ]
 {
 	set tProps=%class.Properties
 	Set tPropKey = ""
@@ -178,6 +227,109 @@ Method ParseHeader(aHeaderData As %String) [ CodeMode = objectgenerator ]
 		Do %code.WriteLine($char(9)_"Set i%"_tProp.Name_" = $zstrip($extract(aHeaderData, "_$increment(tPos)_", "_$increment(tPos, tLen - 1)_"), ""<>"", $c(0,32))")
 		Do:tProp.Name="typeflag" %code.WriteLine($char(9)_"Set:i%"_tProp.Name_"=$c(0) i%"_tProp.Name_" = 0")
 	}
+	quit $$$OK
+}
+
+ClassMethod Compact(Path As %String = "", gzip As %Boolean = 1) As %Stream.FileBinary
+{
+	set header = ""
+	
+	if (gzip) {
+		set archive = ##class(%Stream.FileBinaryGzip).%New()
+	} ELSE {
+		set archive = ##class(%Stream.FileBinary).%New()		
+	}
+
+  set root = ##class(%File).ParentDirectoryName(Path)
+  Do ..ConstructTar(Path, root, archive)
+  
+  return archive
+}
+
+ClassMethod ConstructTar(Path As %String, RelativeTo As %String, archive As %Stream.GlobalBinary)
+{
+  set blockSize = ..#BLOCKSIZE
+	set sep = "/"
+	if ##class(%File).DirectoryExists(Path) {
+		set Path = ##class(%File).NormalizeDirectory(Path)
+		set flag = 5 // Directory
+		set size = 0
+	} else {
+		set Path = ##class(%File).NormalizeFilename(Path)
+		set flag = 0 // Ordinary File
+		set size = ##class(%File).GetFileSize(Path)
+	}
+	set attributes = ##class(%File).Attributes(Path)
+	set name = $PIECE(Path, RelativeTo, 2, *)
+
+	set mtime = ##class(%File).GetFileDateModified(Path, 1)
+	set mtime = $ZDATETIME(mtime, -2)
+
+	set mode = ##class(%File).Attributes(Path)
+
+	set obj = ..%New()
+	set obj.name = name
+	set obj.size = size
+	set obj.mode = mode
+	set obj.mtime = mtime
+	set obj.typeflag = flag	
+
+	set obj.uid = ""
+	set obj.gid = ""
+	set obj.uname = ""
+	set obj.gname = ""
+	
+	set header = obj.ConstructHeader()
+	set obj.chksum = $ZCRC(header, 0)
+	set header = obj.ConstructHeader()
+  
+  if (flag = 0) {
+    do archive.Write(header)
+		set fs = ##class(%Stream.FileBinary).%New()
+		set fs.Filename = Path
+    do archive.CopyFrom(fs)
+    set paddingSize = blockSize - (size # blockSize)
+    set padding = $TRANSLATE($JUSTIFY("", paddingSize), " ", $CHAR(0))
+    do archive.Write(padding)
+  } else {
+    do archive.Write(header)
+    set rs = ##class(%File).FileSetFunc(Path, , "Type", 1)
+		while rs.%Next() {
+      do ..ConstructTar(rs.Name, RelativeTo, archive)
+    }
+  }
+}
+
+Method ConstructHeader() As %Binary [ CodeMode = objectgenerator, Internal ]
+{
+  set blockSize = ..#BLOCKSIZE
+	set tProps=%class.Properties
+	Set tPropKey = ""
+	For {
+		Set tProp = %class.Properties.GetNext(.tPropKey)
+		Quit:(tPropKey = "")
+		CONTINUE:"Header"'=tProp.Parameters.GetAt("CAPTION")
+		set tProps(tProp.SequenceNumber)=tProp
+	}	
+	Do %code.WriteLine($char(9)_"Set tHeader = $TRANSLATE($JUSTIFY("""", "_blockSize_"), "" "", $CHAR(0))")
+	Set tPropKey = "", tPos = 1
+	For {
+		Set tPropKey = $Order(tProps(tPropKey),1,tProp)
+		Quit:tPropKey=""
+		Set tLen = tProp.Parameters.GetAt("MAXLEN")
+		Do %code.WriteLine($char(9)_"Set tVal = i%"_tProp.Name)
+		If (tProp.Parameters.GetAt("TRUNCATE")) {
+			Do %code.WriteLine($char(9)_"Set tVal = $extract(tVal, 1, "_(tLen-1)_")")
+			Do %code.WriteLine($char(9)_"Set tVal = tVal _ $justify("""", "_(tLen)_" - $length(tVal))")
+			Do %code.WriteLine($char(9)_"Set tVal = $translate(tVal, $char(32), $char(0))")
+		} else {
+			Do %code.WriteLine($char(9)_"Set tVal = tVal _ $translate($justify("""", "_(tLen)_" - $length(tVal)), $char(32), $char(0))")
+		}
+		Do %code.WriteLine($char(9)_"Set tVal = $extract(tVal, 1, "_(tLen)_")")
+		Do %code.WriteLine($char(9)_"Set $extract(tHeader, "_tPos_", "_(tPos+tLen-1)_") = tVal")
+		Set tPos = tPos + tLen
+	}
+	Do %code.WriteLine($char(9)_"Return tHeader")
 	quit $$$OK
 }
 

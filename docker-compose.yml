@@ -3,7 +3,10 @@ services:
   iris: 
     build: .
     ports:
-      - 52773:52773
+      - 52775:52773
+    environment: 
+      - IRIS_USER=test
+      - IRIS_PASSWORD=test
     volumes:
       - ~/iris.key:/usr/irissys/mgr/iris.key
-      - ./tests/data:/opt/data
+      - ./tests:/opt/tests

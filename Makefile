@@ -14,7 +14,7 @@ build: ## Build the container
 test: build ## Run UnitTests
 	$(eval TEMPDIR := $(shell mktemp -d /tmp/$(APP_NAME).XXXXXX))
 	echo \
-		"set ^UnitTestRoot=\"/opt/tests/\"\n" \
+		"set ^UnitTestRoot=\"/opt/tests/cls\"\n" \
 		"do ##class(%UnitTest.Manager).RunTestSuites()\n" \
 		"halt" > $(TEMPDIR)/tests.scr
 	echo "#!/bin/bash\n\ncat /opt/extra/tests.scr\n" \
@@ -25,7 +25,6 @@ test: build ## Run UnitTests
 	docker run --rm -i \
 		-v $(HOME)/iris.key:/usr/irissys/mgr/iris.key \
 		-v $(shell pwd)/tests:/opt/tests \
-		-v $(shell pwd)/tests/data:/opt/data \
 		-v $(TEMPDIR)/tests.sh:/opt/extra/tests.sh \
 		-v $(TEMPDIR)/tests.scr:/opt/extra/tests.scr \
 		--entrypoint /opt/extra/tests.sh \
