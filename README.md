@@ -1,6 +1,29 @@
-UnTar tool for InterSystems products
+Tar compress tool for InterSystems products
 ===
+This tool helps to extract data right from `tar.gz` or just `tar` archives with ObjectScript. Or compact any files/folders with tar format and make `tar.gz`.
 
-This tool helps to extract data right from `tar.gz` or just `tar` archives with ObjectScript.
+Installation
+---
+Import and compile file [`src/cls/%zUtils/FileBinaryTar.cls`](https://raw.githubusercontent.com/daimor/isc-tar/master/src/cls/%25zUtils/FileBinaryTar.cls) to `%SYS` namespace.
 
-For examples you can look at tests folder.
+Examples
+---
+Extract `tar.gz` file
+```ObjectScript
+  Set gzip = 1
+  Set extracted = ##class(%ZUtils.FileBinaryTar).ExtractFile("/tmp/some.tgz", gzip)
+  Set tSC = extracted.FindPath("folder/subfolder/test.txt", .file)
+  Set fileContent = file.fileData
+  While 'fileContent.AtEnd {
+    /// read file from archive
+  }
+  Set tSC = extracted.ExtractTo("/tmp/some/place")
+```
+
+Compact folder/file to `tar.gz` file
+```ObjectScript
+  Set gzip = 1
+  Set archive = ##class(%ZUtils.FileBinaryTar).Compact("/tmp/some/place", gzip)
+  Set archive.Filename = "/tmp/some.tgz"
+  Set tSC = archive.%Save()
+```
