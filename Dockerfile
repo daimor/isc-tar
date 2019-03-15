@@ -4,6 +4,8 @@ WORKDIR /opt/src
 
 COPY ./src/ ./
 
+COPY .ci/build_artifacts.sh /
+
 RUN iris start $ISC_PACKAGE_INSTANCENAME quietly EmergencyID=admin,sys \
  && /bin/echo -e "admin\nsys\n" \
         'Do ##class(Security.System).Get(,.p)\n' \

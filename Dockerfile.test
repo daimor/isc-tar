@@ -1,4 +1,4 @@
-FROM intersystems/tar
+FROM daimor/isc-tar
 
 COPY tests /opt/tests
 COPY .ci /opt/
