@@ -2,7 +2,7 @@
 
 iris start $ISC_PACKAGE_INSTANCENAME quietly
 
-ARTIFACT=`pwd`/out/%zUtils.FileBinaryTar.xml
+ARTIFACT=`pwd`/out/zUtils.FileBinaryTar.xml
 
 /bin/echo -e \
   "do \$system.OBJ.Export(\"%zUtils.FileBinaryTar.cls\", \"$ARTIFACT\", \"/diffexport\")\n" \

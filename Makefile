@@ -20,7 +20,7 @@ test: build ## Run UnitTests
 	docker run --rm -i $(IMAGE)-test
 
 release: clean build ## Export as XML
-	docker run --rm -i --entrypoint /build_artifacts.sh $(IMAGE)
+	docker run --rm -i -v `pwd`/out:/opt/out -w /opt --entrypoint /build_artifacts.sh $(IMAGE)
 
 clean:
 	-rm -rf out

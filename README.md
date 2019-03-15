@@ -11,7 +11,7 @@ Examples
 Extract `tar.gz` file
 ```ObjectScript
   Set gzip = 1
-  Set extracted = ##class(%ZUtils.FileBinaryTar).ExtractFile("/tmp/some.tgz", gzip)
+  Set extracted = ##class(%zUtils.FileBinaryTar).ExtractFile("/tmp/some.tgz", gzip)
   Set tSC = extracted.FindPath("folder/subfolder/test.txt", .file)
   Set fileContent = file.fileData
   While 'fileContent.AtEnd {
@@ -23,5 +23,5 @@ Extract `tar.gz` file
 Compact folder/file to `tar.gz` file
 ```ObjectScript
   Set gzip = 1
-  Set archive = ##class(%ZUtils.FileBinaryTar).Compact("/tmp/some/place", gzip, "/tmp/some.tgz")
+  Set archive = ##class(%zUtils.FileBinaryTar).Compact("/tmp/some/place", gzip, "/tmp/some.tgz")
 ```
