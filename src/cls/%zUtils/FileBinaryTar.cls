@@ -68,7 +68,7 @@ Method sizeSet(pSize As %Integer) As %Status
 {
 	set i%size = ..Dec2Oct(pSize, 11)
 	if ($length(i%size)>11) {
-		return $$$ERROR(5001, "Size too big")
+		return $$$ERROR($$$GeneralError, "Size too big")
 	}
 	return $$$OK
 }
@@ -119,7 +119,7 @@ Method FindPath(pPath As %String = "", Output found As FileBinaryTar) As %Status
 	set pPath = $tr(pPath, "\", "/")
 	set tmp = ..GetAt($p(pPath, "/"))
 	if '$isobject(tmp) {
-		return $$$ERROR($$$GeneralError, "not found")
+		return $$$ERROR($$$GeneralError, "Path not found")
 	}
 	if $l(pPath, "/")>1 {
 		return tmp.FindPath($p(pPath, "/", 2, *), .found)
@@ -134,6 +134,9 @@ ClassMethod ExtractFile(aFileName As %String = "", Gzip As %Boolean = 1) As File
     Return $$$ERROR($$$GeneralError, "Filename not specified")
   }
 	if Gzip {
+    if ($system.Version.GetMajor() < 2015) {
+      Throw ##class(%Exception.General).%New("GZIP does not supported on this version")
+    }
 		set fileStream=##class(%Stream.FileBinaryGzip).%New()
 	} else {
 		set fileStream=##class(%Stream.FileBinary).%New()
@@ -260,6 +263,9 @@ ClassMethod Compact(Path As %String = "", gzip As %Boolean = 1, pFileName As %St
   set header = ""
   
   if (gzip) {
+    if ($system.Version.GetMajor() < 2015) {
+      Throw ##class(%Exception.General).%New("GZIP does not supported on this version")
+    }
     set archive = ##class(%Stream.FileBinaryGzip).%New()
   } ELSE {
     set archive = ##class(%Stream.FileBinary).%New()		
