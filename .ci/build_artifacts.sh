@@ -4,12 +4,13 @@ iris start $ISC_PACKAGE_INSTANCENAME quietly
 
 ARTIFACT=`pwd`/out/zUtils.FileBinaryTar.xml
 
-/bin/echo -e \
+/bin/echo -e 'admin\nsys\n' \
   "do \$system.OBJ.Export(\"%zUtils.FileBinaryTar.cls\", \"$ARTIFACT\", \"/diffexport\")\n" \
   "halt" \
 | iris session $ISC_PACKAGE_INSTANCENAME
 
-iris stop $ISC_PACKAGE_INSTANCENAME quietly
+/bin/echo -e 'admin\nsys\n' \
+| iris stop $ISC_PACKAGE_INSTANCENAME quietly
 
 if [ ! -f "$ARTIFACT" ]
 then

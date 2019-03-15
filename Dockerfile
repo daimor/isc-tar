@@ -8,9 +8,6 @@ COPY .ci/build_artifacts.sh /
 
 RUN iris start $ISC_PACKAGE_INSTANCENAME quietly EmergencyID=admin,sys \
  && /bin/echo -e "admin\nsys\n" \
-        'Do ##class(Security.System).Get(,.p)\n' \
-        'Set p("AutheEnabled")=$zb(p("AutheEnabled"),16,7)\n' \
-        'Do ##class(Security.System).Modify(,.p)\n' \
         'do $system.OBJ.ImportDir("/opt/src/", "*.cls", "ck", , 1)\n' \
         'zn "USER"\n' \
         'set ^UnitTestRoot="/opt/tests/"\n' \
