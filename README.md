@@ -23,7 +23,5 @@ Extract `tar.gz` file
 Compact folder/file to `tar.gz` file
 ```ObjectScript
   Set gzip = 1
-  Set archive = ##class(%ZUtils.FileBinaryTar).Compact("/tmp/some/place", gzip)
-  Set archive.Filename = "/tmp/some.tgz"
-  Set tSC = archive.%Save()
+  Set archive = ##class(%ZUtils.FileBinaryTar).Compact("/tmp/some/place", gzip, "/tmp/some.tgz")
 ```

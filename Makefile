@@ -9,8 +9,8 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 build: ## Build the container
-	docker build -t $(IMAGE) .
+	docker build --no-cache -t $(IMAGE) .
 
 test: build ## Run UnitTests
-	docker build -t $(IMAGE)-test -f Dockerfile.test .
+	docker build --no-cache -t $(IMAGE)-test -f Dockerfile.test .
 	docker run --rm -i $(IMAGE)-test

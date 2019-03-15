@@ -40,11 +40,14 @@ Method CheckExtracted(extracted As %zUtils.FileBinaryTar) [ Internal ]
 Method TestCompact()
 {
   set path = ##class(%File).NormalizeDirectory("folder", ..#PATH)
-  set archive = ##class(%zUtils.FileBinaryTar).Compact(path, 0)
+  set tmpFile = ##class(%File).TempFilename("tgz")
+  set archive = ##class(%zUtils.FileBinaryTar).Compact(path, 0, tmpFile)
+  do $$$AssertTrue(##class(%File).Exists(tmpFile), "New archive created")  
 
   do archive.Rewind()
   set extracted = ##class(%zUtils.FileBinaryTar).ExtractStream(archive)
   do ..CheckExtracted(extracted)
+  Do ##class(%File).Delete(tmpFile)
 }
 
 }

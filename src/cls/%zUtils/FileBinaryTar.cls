@@ -255,18 +255,25 @@ Method ParseHeader(aHeaderData As %String) [ CodeMode = objectgenerator, Interna
 	quit $$$OK
 }
 
-ClassMethod Compact(Path As %String = "", gzip As %Boolean = 1) As %Stream.FileBinary
+ClassMethod Compact(Path As %String = "", gzip As %Boolean = 1, pFileName As %String = "") As %Stream.FileBinary
 {
-	set header = ""
-	
-	if (gzip) {
-		set archive = ##class(%Stream.FileBinaryGzip).%New()
-	} ELSE {
-		set archive = ##class(%Stream.FileBinary).%New()		
-	}
-
+  set header = ""
+  
+  if (gzip) {
+    set archive = ##class(%Stream.FileBinaryGzip).%New()
+  } ELSE {
+    set archive = ##class(%Stream.FileBinary).%New()		
+  }
+  if (pFileName'="") {
+    Set tSC = archive.LinkToFile(pFileName)
+    $$$ThrowOnError(tSC)
+  }
+  
   set root = ##class(%File).ParentDirectoryName(Path)
   Do ..ConstructTar(Path, root, archive)
+  Set tSC = archive.%Save()
+  $$$ThrowOnError(tSC)
+  Do archive.%Close()
   
   return archive
 }
