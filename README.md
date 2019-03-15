@@ -4,7 +4,7 @@ This tool helps to extract data right from `tar.gz` or just `tar` archives with 
 
 Installation
 ---
-Import and compile file [`src/cls/%zUtils/FileBinaryTar.cls`](https://raw.githubusercontent.com/daimor/isc-tar/master/src/cls/%25zUtils/FileBinaryTar.cls) to `%SYS` namespace.
+Import and compile file [`zUtils.FileBinaryTar.xml`](https://github.com/daimor/isc-tar/releases/latest) to `%SYS` namespace.
 
 Examples
 ---
