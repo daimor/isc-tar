@@ -31,8 +31,7 @@ action "Artifacts" {
 
 action "Release" {
   needs = ["Artifacts"]
-  uses = "docker://tsub/ghr"
+  uses = "JasonEtco/upload-to-release@master"
   secrets = ["GITHUB_TOKEN"]
-  runs = "/bin/ash"
-  args = ["-c", "ghr -u ${GITHUB_REPOSITORY%/*} -r ${GITHUB_REPOSITORY#*/} ${GITHUB_REF##*/} out"]
+  args = "out/zUtils.FileBinaryTar.xml text/xml"
 }
