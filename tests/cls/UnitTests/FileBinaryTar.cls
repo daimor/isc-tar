@@ -2,12 +2,18 @@ Class UnitTests.FileBinaryTar Extends %UnitTest.TestCase
 {
 
 /// Path to examples files
-Parameter PATH = "/opt/tests/data/";
+Property Path As %String;
+
+Method OnBeforeAllTests() As %Status
+{
+  set ..Path = ##class(%File).NormalizeDirectory("data", ##class(%File).ParentDirectoryName(^UnitTestRoot))
+  Quit $$$OK
+}
 
 /// Testing extract archive
 Method TestExtract()
 {
-  set fileName = ##class(%File).NormalizeFilename("test.tgz", ..#PATH)
+  set fileName = ##class(%File).NormalizeFilename("test.tgz", ..Path)
   set extracted = ##class(%zUtils.FileBinaryTar).ExtractFile(fileName)
   do ..CheckExtracted(extracted)
 }
@@ -39,7 +45,7 @@ Method CheckExtracted(extracted As %zUtils.FileBinaryTar) [ Internal ]
 /// Testing Compact some data to archive
 Method TestCompact()
 {
-  set path = ##class(%File).NormalizeDirectory("folder", ..#PATH)
+  set path = ##class(%File).NormalizeDirectory("folder", ..Path)
   set tmpFile = ##class(%File).TempFilename("tgz")
   set archive = ##class(%zUtils.FileBinaryTar).Compact(path, 0, tmpFile)
   do $$$AssertTrue(##class(%File).Exists(tmpFile), "New archive created")  

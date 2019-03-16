@@ -1,8 +1,8 @@
 #!/bin/sh
 
-iris start $ISC_PACKAGE_INSTANCENAME quietly
-
 ARTIFACT=`pwd`/out/zUtils.FileBinaryTar.xml
+
+iris start $ISC_PACKAGE_INSTANCENAME quietly EmergencyID=admin,sys \
 
 /bin/echo -e 'admin\nsys\n' \
   "do \$system.OBJ.Export(\"%zUtils.FileBinaryTar.cls\", \"$ARTIFACT\", \"/diffexport\")\n" \

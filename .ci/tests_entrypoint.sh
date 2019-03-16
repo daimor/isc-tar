@@ -1,9 +1,11 @@
 #!/bin/sh
 
+TESTS=`pwd`/tests/cls
+
 iris start $ISC_PACKAGE_INSTANCENAME quietly EmergencyID=admin,sys \
 
 /bin/echo -e 'admin\nsys\n' \
-  'set ^UnitTestRoot="/opt/tests/cls"\n' \
+  "set ^UnitTestRoot=\"$TESTS\"\n" \
   'do ##class(%UnitTest.Manager).RunTest()\n' \
   'halt\n' \
 | iris session $ISC_PACKAGE_INSTANCENAME | tee /tmp/tests.log

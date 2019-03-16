@@ -12,13 +12,15 @@ action "Build" {
   uses = "actions/action-builder/docker@master"
   runs = "make"
   args = "build"
+  env = {
+    IMAGE = "daimor/isc-tar"
+  }
 }
 
 action "Test" {
   needs = ["Build"]
-  uses = "actions/action-builder/docker@master"
-  runs = "make"
-  args = "test"
+  uses = "docker://daimor/isc-tar"
+  runs = "/tests_entrypoint.sh"
 }
 
 action "Artifacts" {
