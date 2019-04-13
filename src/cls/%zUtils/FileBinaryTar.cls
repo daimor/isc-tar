@@ -274,6 +274,8 @@ ClassMethod Compact(Path As %String = "", gzip As %Boolean = 1, pFileName As %St
   if relativeTo="" {
     set relativeTo = ##class(%File).ParentDirectoryName(Path)
   }
+  set relativeTo = ##class(%File).NormalizeDirectory(relativeTo)
+
   Do ..ConstructTar(Path, relativeTo, archive)
   Set tSC = archive.%Save()
   $$$ThrowOnError(tSC)
@@ -284,6 +286,7 @@ ClassMethod Compact(Path As %String = "", gzip As %Boolean = 1, pFileName As %St
 
 ClassMethod ConstructTar(Path As %String, RelativeTo As %String, archive As %Stream.GlobalBinary)
 {
+  QUIT:Path=archive.Filename // skip archive itself
   set blockSize = ..#BLOCKSIZE
   if ##class(%File).DirectoryExists(Path) {
     set Path = ##class(%File).NormalizeDirectory(Path)
@@ -320,14 +323,16 @@ ClassMethod ConstructTar(Path As %String, RelativeTo As %String, archive As %Str
     set header = obj.ConstructHeader()
   }
   
-  if (flag = 0) {
+  if (size > 0) {
     do archive.Write(header)
     set fs = ##class(%Stream.FileBinary).%New()
     set fs.Filename = Path
     do archive.CopyFrom(fs)
-    set paddingSize = blockSize - (size # blockSize)
-    set padding = $TRANSLATE($JUSTIFY("", paddingSize), " ", $CHAR(0))
-    do archive.Write(padding)
+    if (size # blockSize) > 0 {
+      set paddingSize = blockSize - (size # blockSize)
+      set padding = $TRANSLATE($JUSTIFY("", paddingSize), " ", $CHAR(0))
+      do archive.Write(padding)
+    }
   } else {
     do archive.Write(header)
     set rs = ##class(%File).FileSetFunc(Path, , "Type", 1)
