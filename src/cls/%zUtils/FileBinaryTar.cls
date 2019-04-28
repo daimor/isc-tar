@@ -119,7 +119,7 @@ Method FindPath(pPath As %String = "", Output found As FileBinaryTar) As %Status
   set pPath = $tr(pPath, "\", "/")
   set tmp = ..GetAt($p(pPath, "/"))
   if '$isobject(tmp) {
-    return $$$ERROR($$$GeneralError, "not found")
+    return $$$ERROR($$$GeneralError, "Path '"_pPath_"' not found")
   }
   if $l(pPath, "/")>1 {
     return tmp.FindPath($p(pPath, "/", 2, *), .found)
@@ -177,8 +177,16 @@ ClassMethod ExtractStream(aFileStream As %Stream.Object) As FileBinaryTar
     set longLink4Name=""
     set longLink4Link=""
     do {
+      set repeat=0
       set tHeader=aFileStream.Read(blockSize)
       do tFile.ParseHeader(tHeader)
+      if tFile.name="./" {
+        set repeat=1
+        continue
+      }
+      If ($EXTRACT(tFile.name, 1, 2) = "./") {
+        Set tFile.name = $EXTRACT(tFile.name, 3, *)
+      }
       quit:tFile.name=""
       set $EXTRACT(tHeader, 149, 156) = $JUSTIFY("", 8)
       set chksumExpected = $zcrc(tHeader, 0)
@@ -322,7 +330,7 @@ ClassMethod ConstructTar(Path As %String, RelativeTo As %String, archive As %Str
     set obj.chksum = $ZCRC(header, 0)
     set header = obj.ConstructHeader()
   }
-  
+
   if (size > 0) {
     do archive.Write(header)
     set fs = ##class(%Stream.FileBinary).%New()
@@ -362,8 +370,11 @@ Method ConstructHeader() As %Binary [ CodeMode = objectgenerator, Internal ]
     Do %code.WriteLine($char(9)_"Set tVal = i%"_tProp.Name)
     If (tProp.Parameters.GetAt("TRUNCATE")) {
       Do %code.WriteLine($char(9)_"Set tVal = $extract(tVal, 1, "_(tLen-1)_")")
-      Do %code.WriteLine($char(9)_"Set tVal = tVal _ $justify("""", "_(tLen)_" - $length(tVal))")
-      Do %code.WriteLine($char(9)_"Set tVal = $translate(tVal, $char(32), $char(0))")
+      #; Do %code.WriteLine($char(9)_"Set tVal = tVal _ $justify("""", "_(tLen)_" - $length(tVal))")
+      #; Do %code.WriteLine($char(9)_"Set tVal = $translate(tVal, $char(32), $char(0))")
+      Do %code.WriteLine($char(9)_"Set tPadding = $justify("""", "_(tLen)_" - $length(tVal))")
+      Do %code.WriteLine($char(9)_"Set tPadding = $translate(tPadding, $char(32), $char(0))")
+      Do %code.WriteLine($char(9)_"Set tVal = tVal _ tPadding")
     } else {
       Do %code.WriteLine($char(9)_"Set tVal = tVal _ $translate($justify("""", "_(tLen)_" - $length(tVal)), $char(32), $char(0))")
     }

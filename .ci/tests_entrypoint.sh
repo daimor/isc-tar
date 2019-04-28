@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TESTS=`pwd`/tests/cls
+TESTS=`pwd`/tests/src
 
 iris start $ISC_PACKAGE_INSTANCENAME quietly EmergencyID=admin,sys \
 

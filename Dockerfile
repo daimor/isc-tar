@@ -9,7 +9,7 @@ RUN iris start $ISC_PACKAGE_INSTANCENAME quietly EmergencyID=admin,sys \
  && /bin/echo -e "admin\nsys\n" \
         'do $system.OBJ.ImportDir("/opt/src/", "*.cls", "ck", , 1)\n' \
         'zn "USER"\n' \
-        'set ^UnitTestRoot="/opt/tests/"\n' \
+        'set ^UnitTestRoot="/opt/tests/src/"\n' \
         'do $system.OBJ.SetQualifiers("/nodelete")\n' \
         'halt\n' \
   | iris session $ISC_PACKAGE_INSTANCENAME \
