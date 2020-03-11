@@ -1,0 +1,15 @@
+name: push
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build
+        run: make build
+      - name: Test
+        run: make test
+      - name: Test
+        run: make release
