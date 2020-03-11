@@ -3,9 +3,6 @@ services:
   iris: 
     build: .
     ports:
-      - 52775:52773
-    environment: 
-      - IRIS_USER=test
-      - IRIS_PASSWORD=test
+      - 52773-52783:52773
     volumes:
       - ./tests:/opt/tests

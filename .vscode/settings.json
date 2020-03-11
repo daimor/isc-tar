@@ -2,9 +2,9 @@
     "objectscript.conn": {
         "active": true,
         "ns": "%SYS",
-        "port": "52775",
-        "username": "test",
-        "password": "test"
+        "docker-compose": {
+          "service": "iris"
+        }
     },
     "objectscript.conn.version": 3
 }
