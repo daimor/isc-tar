@@ -1,0 +1,27 @@
+name: release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build
+        run: make build
+      - name: Test
+        run: make test
+      - name: Release
+        run: make release
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./out/zUtils.FileBinaryTar.xml
+          asset_name: zUtils.FileBinaryTar.xml
+          asset_content_type: text/xml
