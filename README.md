@@ -1,10 +1,19 @@
+[![Gitter](https://img.shields.io/badge/Available%20on-Intersystems%20Open%20Exchange-00b2a9.svg)](https://openexchange.intersystems.com/package/isc-tar)
+
 Tar compress tool for InterSystems products
 ===
 This tool helps to extract data right from `tar.gz` or just `tar` archives with ObjectScript. Or compact any files/folders with tar format and make `tar.gz`.
 
-Installation
+Standalone installation
 ---
 Import and compile file [`zUtils.FileBinaryTar.xml`](https://github.com/daimor/isc-tar/releases/latest) to `%SYS` namespace.
+
+Development mode 
+---
+```
+docker-compose up -d --build
+```
+Avialable in any namespace, code stored in %SYS.
 
 Examples
 ---
