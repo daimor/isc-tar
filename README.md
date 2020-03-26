@@ -7,6 +7,10 @@ This tool helps to extract data right from `tar.gz` or just `tar` archives with 
 Standalone installation
 ---
 Import and compile file [`zUtils.FileBinaryTar.xml`](https://github.com/daimor/isc-tar/releases/latest) to `%SYS` namespace.
+Or install with zpm
+```
+zpm "install isc-tar"
+```
 
 Development mode 
 ---
