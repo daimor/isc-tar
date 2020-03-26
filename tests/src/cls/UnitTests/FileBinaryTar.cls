@@ -6,14 +6,16 @@ Property Path As %String;
 
 Method OnBeforeAllTests() As %Status
 {
-  set ..Path = ##class(%File).NormalizeDirectory("data", ##class(%File).ParentDirectoryName(^UnitTestRoot))
+  set ..Path = ##class(%File).NormalizeDirectory("_data", ^UnitTestRoot)
+  zw ..Path
   Quit $$$OK
 }
 
 /// Testing extract archive
 Method TestExtract()
 {
-  set fileName = ##class(%File).NormalizeFilename("test.tgz", ##class(%File).ParentDirectoryName(..Path))
+  set fileName = ##class(%File).NormalizeFilename("test.tgz", ..Path)
+  Quit:'$$$AssertTrue(##class(%File).Exists(fileName), fileName_" should exist")
   set extracted = ##class(%zUtils.FileBinaryTar).ExtractFile(fileName)
   do ..CheckExtracted(extracted)
 }
@@ -32,7 +34,7 @@ Method CompareFolders(pOriginal As %String, pNew As %String)
       }
       set tNewName = ##class(%File).NormalizeDirectory(pNew) _ tName
       if $$$AssertTrue(##class(%File).Exists(tNewName), tNewName) {
-        do $$$AssertEquals(##class(%File).GetFileSize(tNewName), ##class(%File).GetFileSize(tRS.Name))
+        return:'$$$AssertEquals(##class(%File).GetFileSize(tNewName), ##class(%File).GetFileSize(tRS.Name))
       }
     }
   }
@@ -41,13 +43,13 @@ Method CompareFolders(pOriginal As %String, pNew As %String)
 Method CheckExtracted(extracted As %zUtils.FileBinaryTar) [ Internal ]
 {
   do $$$AssertTrue($isobject(extracted), "Extract successful")
-  do $$$AssertStatusOK(extracted.FindPath("folder", .folder), "root folder")
+  if $$$AssertStatusOK(extracted.FindPath("folder", .folder), "root folder") {
   do $$$AssertStatusOK(extracted.FindPath("folder/subfolder/test.txt", .file), "test.txt in the subfolder")
   if $$$AssertEquals(file.fileData.Read(), "test file in subfolder", "right content") {
   do $$$AssertStatusOK(folder.FindPath("test.txt", .file), "test.txt in the folder") }
   do $$$AssertEquals(file.fileData.Read(), "test file in folder", "right content")
   do $$$AssertStatusOK(folder.FindPath("file with spaces.txt", .file), "file with spaces.txt in the folder")
-  do $$$AssertEquals(file.fileData.Read(), "test content for file with spaces", "right content")
+  do $$$AssertEquals(file.fileData.Read(), "test content for file with spaces", "right content") }
   if $$$AssertStatusOK(extracted.FindPath("folder with spaces/test.txt", .file), "test.txt in the folder with spaces") {
   do $$$AssertEquals(file.fileData.Read(), "test file in folder with spaces", "right content") }
   if $$$AssertStatusOK(extracted.FindPath("folder with spaces/file with spaces.txt", .file), "file with spaces.txt in the folder with spaces") {
@@ -56,7 +58,7 @@ Method CheckExtracted(extracted As %zUtils.FileBinaryTar) [ Internal ]
   set tmpDir = $$$FileTempDir
   do $$$AssertStatusOK(extracted.ExtractTo(tmpDir))
 
-  Do ..CompareFolders(..Path, tmpDir)
+  Do ..CompareFolders(##class(%File).NormalizeDirectory("data", ..Path), tmpDir)
 
   do ##class(%File).RemoveDirectoryTree(tmpDir)
 }
@@ -64,7 +66,7 @@ Method CheckExtracted(extracted As %zUtils.FileBinaryTar) [ Internal ]
 /// Testing Compact some data to archive
 Method TestCompact()
 {
-  set path = ##class(%File).NormalizeDirectory(..Path)
+  set path = ##class(%File).NormalizeDirectory("data", ..Path)
   set tmpFile = ##class(%File).TempFilename("tgz")
   set archive = ##class(%zUtils.FileBinaryTar).Compact(path, 0, tmpFile, path)
   do $$$AssertTrue(##class(%File).Exists(tmpFile), "New archive created")  

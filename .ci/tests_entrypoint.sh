@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TESTS=`pwd`/tests/src
+TESTS=`pwd`/tests
 
 iris start $ISC_PACKAGE_INSTANCENAME quietly \
 
@@ -10,8 +10,7 @@ iris start $ISC_PACKAGE_INSTANCENAME quietly \
   'halt\n' \
 | iris session $ISC_PACKAGE_INSTANCENAME | tee /tmp/tests.log
 
-/bin/echo -e '' \
-| iris stop $ISC_PACKAGE_INSTANCENAME quietly
+iris stop $ISC_PACKAGE_INSTANCENAME quietly
 
 if ! grep -iq "All PASSED" /tmp/tests.log 
 then

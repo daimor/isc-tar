@@ -4,13 +4,9 @@ ARTIFACT=`pwd`/out/zUtils.FileBinaryTar.xml
 
 iris start $ISC_PACKAGE_INSTANCENAME quietly \
 
-/bin/echo -e '' \
-  "do \$system.OBJ.Export(\"%zUtils.FileBinaryTar.cls\", \"$ARTIFACT\", \"/diffexport/exportversion=2017.1\")\n" \
-  "halt" \
-| iris session $ISC_PACKAGE_INSTANCENAME
+iris session $ISC_PACKAGE_INSTANCENAME "##class(%SYSTEM.OBJ).Export(\"%zUtils.FileBinaryTar.cls\",\"$ARTIFACT\",\"/diffexport/exportversion=2017.1\")"
 
-/bin/echo -e '' \
-| iris stop $ISC_PACKAGE_INSTANCENAME quietly
+iris stop $ISC_PACKAGE_INSTANCENAME quietly
 
 if [ ! -f "$ARTIFACT" ]
 then

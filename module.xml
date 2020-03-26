@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Document name="isc-tar.ZPM"><Module>
+ <Name>isc-tar</Name>
+  <Version>0.1.2</Version>
+  <Packaging>module</Packaging>
+  <SourcesRoot>src</SourcesRoot>
+  <Resource Name="%zUtils.FileBinaryTar.cls"/>
+  <UnitTest Name="/tests" Package="UnitTests" Phase="test"/>
+</Module>
+</Document></Export>
