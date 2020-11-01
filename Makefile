@@ -1,5 +1,8 @@
 APP_NAME = isc-tar
-IMAGE ?= daimor/$(APP_NAME)
+COMMIT := $(shell git rev-parse HEAD)
+IMAGE ?= daimor/$(APP_NAME):$(COMMIT)
+TAGS := -t $(IMAGE) -t daimor/$(APP_NAME)
+OPTIONS := -v `pwd`:/home/irisowner/$(APP_NAME) -w /home/irisowner/$(APP_NAME)
 
 SHELL := /bin/bash
 
@@ -11,13 +14,15 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 build: ## Build the image
-	docker build -t $(IMAGE) --no-cache .
+	docker build $(TAGS) --no-cache .
 
 test: build ## Run UnitTests
-	docker run --rm -i -v `pwd`/tests:/opt/tests -w /opt --entrypoint /tests_entrypoint.sh $(IMAGE)
+	docker run --rm -i $(OPTIONS) --entrypoint /tests_entrypoint.sh $(IMAGE)
 
 release: clean build ## Export as XML
-	docker run --rm -i -v `pwd`/out:/tmp/$(APP_NAME)/out -w /tmp/$(APP_NAME) --entrypoint /build_artifacts.sh $(IMAGE)
+	mkdir out
+	setfacl -dm 'u:51773:rw' out
+	docker run --rm -i $(OPTIONS) --entrypoint /build_artifacts.sh $(IMAGE)
 
 clean:
 	-rm -rf out

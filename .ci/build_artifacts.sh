@@ -1,6 +1,14 @@
 #!/bin/sh
 
+set -x 
+
 ARTIFACT=`pwd`/out/zUtils.FileBinaryTar.xml
+
+whoami
+getfacl .
+ls -lan .
+
+mkdir -p $( dirname $ARTIFACT ) 
 
 iris start $ISC_PACKAGE_INSTANCENAME quietly \
 
