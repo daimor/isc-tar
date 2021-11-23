@@ -1,21 +1,30 @@
-name: release
+name: push
 
 on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
   release:
-    types: [created]
+    types:
+      - released
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Build
+      - uses: actions/checkout@v2
+      - uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+      - name: Build and Test
         run: make build
-      - name: Test
-        run: make test
       - name: Release
         run: make release
       - name: Upload Release Asset
+        if: github.event_name == 'release'
         id: upload-release-asset
         uses: actions/upload-release-asset@master
         env:
