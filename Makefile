@@ -13,16 +13,11 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
-build: ## Build the image
-	docker build $(TAGS) --no-cache .
+build: ## Build the image with tests
+	docker build $(TAGS) --no-cache --build-arg TESTS=1 .
 
-test: build ## Run UnitTests
-	docker run --rm -i $(OPTIONS) --entrypoint /tests_entrypoint.sh $(IMAGE)
-
-release: clean build ## Export as XML
-	mkdir out
-	setfacl -dm 'u:51773:rw' out
-	docker run --rm -i $(OPTIONS) --entrypoint /build_artifacts.sh $(IMAGE)
+release: # clean build ## Export as XML
+	docker run --rm -i $(OPTIONS) -v `pwd`/.ci/build_artifacts.sh:/build_artifacts.sh -v `pwd`/out/:/home/irisowner/isc-tar/out/ -w /home/irisowner/isc-tar/ --entrypoint /build_artifacts.sh $(IMAGE)
 
 clean:
 	-rm -rf out

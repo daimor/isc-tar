@@ -7,15 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Set permissions
-        # write permission to irisowner
-        run: |
-          setfacl -dm 'u:51773:rw' .
-          setfacl -dm 'g:51773:rwx' .
-          setfacl -dm 'o::rw' .
-      - name: Build
+      - name: Build and Test
         run: make build
-      - name: Test
-        run: make test
       - name: Release
         run: make release

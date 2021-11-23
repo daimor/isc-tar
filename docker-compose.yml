@@ -3,6 +3,6 @@ services:
   iris: 
     build: .
     ports:
-      - 52773-52783:52773
+      - 52773
     volumes:
-      - ./tests:/opt/tests
+      - ./tests:/home/irisowner/isc-tar/tests

@@ -1,16 +1,12 @@
-FROM store/intersystems/iris-community:2020.4.0.521.0
+FROM intersystemsdc/iris-community
 
-WORKDIR /home/irisowner/isc-tar
+ARG MODULE=isc-tar
 
-COPY src src
-COPY .ci/* /
+WORKDIR /home/irisowner/$MODULE
+ARG TESTS=0
 
-RUN iris start $ISC_PACKAGE_INSTANCENAME quietly \
- && /bin/echo -e "" \
-        'do $system.OBJ.ImportDir("/home/irisowner/isc-tar/src/", "*.cls", "ck", , 1)\n' \
-        'zn "USER"\n' \
-        'set ^UnitTestRoot="/home/irisowner/isc-tar/tests/"\n' \
-        'do $system.OBJ.SetQualifiers("/nodelete")\n' \
-        'halt\n' \
-  | iris session $ISC_PACKAGE_INSTANCENAME \
- && iris stop $ISC_PACKAGE_INSTANCENAME quietly
+RUN --mount=type=bind,src=.,dst=. \
+  iris start iris && \
+  iris session iris "##class(%ZPM.PackageManager).Shell(\"load $PWD -v\",1,1)" && \
+  ([ $TESTS -eq 0 ] || iris session iris "##class(%ZPM.PackageManager).Shell(\"test $MODULE -v -only\",1,1)") && \
+  iris stop iris quietly
