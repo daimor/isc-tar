@@ -4,5 +4,8 @@ services:
     build: .
     ports:
       - 52773
+    command: 
+      - -a
+      - iris session iris -U%SYS '##class(Security.Users).UnExpireUserPasswords("*")'
     volumes:
       - ./tests:/home/irisowner/isc-tar/tests

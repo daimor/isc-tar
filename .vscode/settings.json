@@ -1,10 +1,11 @@
 {
-    "objectscript.conn": {
-        "active": true,
-        "ns": "%SYS",
-        "docker-compose": {
-          "service": "iris"
-        }
-    },
-    "objectscript.conn.version": 3
+  "objectscript.conn": {
+    "active": true,
+    "ns": "%SYS",
+    "username": "_SYSTEM",
+    "password": "SYS",
+    "docker-compose": {
+      "service": "iris"
+    }
+  }
 }
