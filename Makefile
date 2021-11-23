@@ -14,7 +14,7 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 build: ## Build the image with tests
-	docker build $(TAGS) --no-cache --build-arg TESTS=1 -t $(IMAGE) .
+	docker build $(TAGS) --build-arg TESTS=1 .
 
 release: clean build ## Export as XML
 	docker run --rm -i $(OPTIONS) -v `pwd`/.ci/build_artifacts.sh:/build_artifacts.sh -v `pwd`/out/:/home/irisowner/isc-tar/out/ -w /home/irisowner/isc-tar/ --entrypoint /build_artifacts.sh $(IMAGE)
