@@ -24,22 +24,3 @@ jobs:
           load: true
           tags: ${{ github.repository }}:${{ github.sha }}
           build-args: TESTS=1
-      - name: Build XML
-        run: |
-          docker run --rm -u root \
-            -v `pwd`/.ci/build_artifacts.sh:/build_artifacts.sh \
-            -v `pwd`/out/:/home/irisowner/isc-tar/out/ \
-            -w /home/irisowner/isc-tar/ \
-            ${{ github.repository }}:${{ github.sha }} -a /build_artifacts.sh;
-          [ -f "out/zUtils.FileBinaryTar.xml" ]
-      - name: Upload Release Asset
-        if: github.event_name == 'release'
-        id: upload-release-asset
-        uses: actions/upload-release-asset@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./out/zUtils.FileBinaryTar.xml
-          asset_name: zUtils.FileBinaryTar.xml
-          asset_content_type: text/xml
