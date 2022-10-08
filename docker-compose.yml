@@ -7,5 +7,6 @@ services:
     command: 
       - -a
       - iris session iris -U%SYS '##class(Security.Users).UnExpireUserPasswords("*")'
+      - --check-caps false
     volumes:
       - ./tests:/home/irisowner/isc-tar/tests
